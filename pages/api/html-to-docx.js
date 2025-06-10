@@ -134,6 +134,48 @@ function createTextRunFromElement(element, $, styleMap) {
   return new TextRun(textRunProps);
 }
 
+function createTextRunFromText(text, parentStyle = '') {
+  if (!text.trim()) return null;
+  
+  const color = extractStyleValue(parentStyle, 'color');
+  const fontFamily = extractStyleValue(parentStyle, 'font-family');
+  const fontSize = extractStyleValue(parentStyle, 'font-size');
+  const fontWeight = extractStyleValue(parentStyle, 'font-weight');
+  const textTransform = extractStyleValue(parentStyle, 'text-transform');
+  
+  let processedText = text;
+  if (textTransform === 'uppercase') {
+    processedText = text.toUpperCase();
+  }
+  
+  const textRunProps = {
+    text: processedText,
+  };
+  
+  // Apply styling
+  if (color) {
+    const rgbColor = hexToRgb(color);
+    if (rgbColor) {
+      textRunProps.color = rgbColor;
+    }
+  }
+  
+  if (fontFamily) {
+    textRunProps.font = fontFamily.replace(/["']/g, '').split(',')[0].trim();
+  }
+  
+  if (fontSize && fontSize.includes('px')) {
+    const px = parseInt(fontSize);
+    textRunProps.size = Math.round(px * 0.75) * 2;
+  }
+  
+  if (fontWeight === 'bold') {
+    textRunProps.bold = true;
+  }
+  
+  return new TextRun(textRunProps);
+}
+
 function parseHtmlToDocxElements(html) {
   const $ = cheerio.load(html);
   const elements = [];
@@ -203,7 +245,7 @@ function parseHtmlToDocxElements(html) {
         
         $elem.contents().each((i, child) => {
           if (child.type === 'text' && child.data.trim()) {
-            const textRun = createTextRunFromElement({ tagName: 'span', textContent: child.data }, $, styleMap);
+            const textRun = createTextRunFromText(child.data, effectiveStyle);
             if (textRun) {
               runs.push(textRun);
               hasContent = true;
