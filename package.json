@@ -1,0 +1,35 @@
+{
+  "name": "file-conversion-api",
+  "version": "1.0.0",
+  "description": "A REST API for file conversion deployed on Vercel",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "multer": "^1.4.5-lts.1",
+    "formidable": "^3.5.1",
+    "turndown": "^7.1.2",
+    "mammoth": "^1.6.0",
+    "pdf-parse": "^1.1.1",
+    "html-docx-js": "^0.3.1",
+    "jszip": "^3.10.1",
+    "cheerio": "^1.0.0-rc.12"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@types/multer": "^1.4.11",
+    "@types/turndown": "^5.0.4",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
