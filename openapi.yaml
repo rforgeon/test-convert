@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: File Conversion API
+  description: |
+    A REST API that provides file conversion capabilities using JavaScript libraries.
+    
+    ## Features
+    - Convert files to Markdown (HTML, DOCX, PDF, TXT)
+    - Convert HTML content to DOCX format
+    - Serverless deployment optimized for Vercel
+    - No system dependencies required
+    
+    ## Supported File Types
+    - **HTML/HTM**: Direct conversion using Turndown
+    - **DOCX**: Converts to HTML first, then to Markdown using Mammoth
+    - **PDF**: Extracts text content using PDF-parse
+    - **TXT**: Direct text-to-markdown conversion
+    - **Other text files**: Wrapped in code blocks
+  version: 1.0.0
+  contact:
+    name: File Conversion API Support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://test-convert.vercel.app
+    description: Production server
+  - url: http://localhost:3000
+    description: Development server
+paths:
+  /api:
+    get:
+      summary: List Available Endpoints
+      description: Returns a list of all available API endpoints with their documentation
+      operationId: listEndpoints
+      tags:
+        - General
+      responses:
+        '200':
+          description: Successfully retrieved endpoint information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "File Conversion API"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  endpoints:
+                    type: object
+                    properties:
+                      "GET /api":
+                        type: string
+                        example: "This endpoint - lists available endpoints"
+                      "GET /api/health":
+                        type: string
+                        example: "Health check endpoint"
+                      "POST /api/convert-to-markdown":
+                        type: string
+                        example: "Convert files to markdown format"
+                      "POST /api/html-to-docx":
+                        type: string
+                        example: "Convert HTML content to DOCX format"
+                  documentation:
+                    type: object
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/health:
+    get:
+      summary: Health Check
+      description: Verifies that the service is running and all dependencies are available
+      operationId: healthCheck
+      tags:
+        - General
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T00:00:00.000Z"
+                  service:
+                    type: string
+                    example: "File Conversion API"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  dependencies:
+                    type: object
+                    properties:
+                      turndown:
+                        type: string
+                        example: "Available"
+                      mammoth:
+                        type: string
+                        example: "Available"
+                      pdf-parse:
+                        type: string
+                        example: "Available"
+                      html-docx-js:
+                        type: string
+                        example: "Available"
+                  supported_conversions:
+                    type: array
+                    items:
+                      type: string
+                    example: ["HTML to Markdown", "DOCX to Markdown", "PDF to Markdown", "HTML to DOCX"]
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/convert-to-markdown:
+    post:
+      summary: Convert Files to Markdown
+      description: |
+        Upload one or multiple files and convert them to markdown format.
+        Supports HTML, DOCX, PDF, TXT, and other text-based files.
+      operationId: convertToMarkdown
+      tags:
+        - File Conversion
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: One or more files to convert to markdown
+              required:
+                - files
+            examples:
+              single_file:
+                summary: Convert single PDF file
+                value:
+                  files: "@document.pdf"
+              multiple_files:
+                summary: Convert multiple files
+                value:
+                  files: ["@document.pdf", "@spreadsheet.xlsx", "@webpage.html"]
+      responses:
+        '200':
+          description: Successfully converted files to markdown
+          content:
+            text/markdown:
+              schema:
+                type: string
+                example: |
+                  # document.pdf
+                  
+                  This is the extracted text content from the PDF file.
+                  
+                  ---
+                  
+                  # spreadsheet.xlsx
+                  
+                  *Unable to convert this file type to markdown*
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="converted.md"'
+        '400':
+          description: Bad request - no files provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "No files provided"
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error during file processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Error processing files"
+                details: "Specific error message"
+
+  /api/html-to-docx:
+    post:
+      summary: Convert HTML to DOCX
+      description: |
+        Convert HTML content to a Microsoft Word DOCX file.
+        Accepts any valid HTML content and returns a downloadable DOCX file.
+      operationId: convertHtmlToDocx
+      tags:
+        - File Conversion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                html_content:
+                  type: string
+                  description: The HTML content to convert to DOCX
+                  example: "<html><body><h1>Hello World</h1><p>This is a test document.</p></body></html>"
+                filename:
+                  type: string
+                  description: The desired filename for the output DOCX file (optional)
+                  example: "test.docx"
+                  default: "output.docx"
+              required:
+                - html_content
+            examples:
+              basic_html:
+                summary: Convert simple HTML
+                value:
+                  html_content: "<html><body><h1>Hello World</h1><p>This is a test document.</p></body></html>"
+                  filename: "test.docx"
+              complex_html:
+                summary: Convert complex HTML with formatting
+                value:
+                  html_content: "<html><body><h1>Report Title</h1><h2>Section 1</h2><p>Content with <strong>bold</strong> and <em>italic</em> text.</p><ul><li>Item 1</li><li>Item 2</li></ul></body></html>"
+                  filename: "report.docx"
+      responses:
+        '200':
+          description: Successfully converted HTML to DOCX
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="test.docx"'
+            Content-Length:
+              schema:
+                type: integer
+                description: Size of the DOCX file in bytes
+        '400':
+          description: Bad request - missing HTML content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "html_content is required"
+        '405':
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error during HTML to DOCX conversion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Error converting HTML to DOCX"
+                details: "Specific error message"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message describing what went wrong
+        details:
+          type: string
+          description: Additional details about the error (optional)
+      required:
+        - error
+      example:
+        error: "Method not allowed"
+
+  examples:
+    HealthyResponse:
+      summary: Healthy service response
+      value:
+        status: "healthy"
+        timestamp: "2024-01-01T12:00:00.000Z"
+        service: "File Conversion API"
+        version: "1.0.0"
+        dependencies:
+          turndown: "Available"
+          mammoth: "Available"
+          pdf-parse: "Available"
+          html-docx-js: "Available"
+        supported_conversions:
+          - "HTML to Markdown"
+          - "DOCX to Markdown"
+          - "PDF to Markdown"
+          - "HTML to DOCX"
+
+tags:
+  - name: General
+    description: General API information and health checks
+  - name: File Conversion
+    description: File conversion operations
+
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/rforgeon/test-convert 
