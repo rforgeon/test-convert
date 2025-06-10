@@ -12,7 +12,8 @@ export default function handler(req, res) {
       "turndown": "Available",
       "mammoth": "Available", 
       "pdf-parse": "Available",
-      "html-docx-js": "Available"
+      "docx": "Available",
+      "cheerio": "Available"
     },
     supported_conversions: [
       "HTML to Markdown",
