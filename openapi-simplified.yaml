@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: File Conversion API
+  description: A REST API for converting files to markdown and HTML to DOCX format
+  version: 1.0.0
+servers:
+  - url: https://test-convert.vercel.app
+    description: Production server
+paths:
+  /api/health:
+    get:
+      summary: Health Check
+      description: Check if the API service is running
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+                  version:
+                    type: string
+
+  /api/convert-to-markdown:
+    post:
+      summary: Convert Files to Markdown
+      description: Upload files and convert them to markdown format
+      operationId: convertToMarkdown
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: Successfully converted to markdown
+          content:
+            text/markdown:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /api/html-to-docx:
+    post:
+      summary: Convert HTML to DOCX
+      description: Convert HTML content to a Microsoft Word document
+      operationId: convertHtmlToDocx
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                html_content:
+                  type: string
+                  description: HTML content to convert
+                filename:
+                  type: string
+                  description: Output filename
+              required:
+                - html_content
+      responses:
+        '200':
+          description: Successfully converted to DOCX
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string 

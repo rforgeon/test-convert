@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: File Conversion API
+  version: 1.0.0
+  description: Convert files to markdown and HTML to DOCX
+servers:
+  - url: https://test-convert.vercel.app
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      summary: Check API health
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/convert-to-markdown:
+    post:
+      operationId: convertFilesToMarkdown
+      summary: Convert files to markdown
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Markdown file
+          content:
+            text/markdown:
+              schema:
+                type: string
+
+  /api/html-to-docx:
+    post:
+      operationId: convertHtmlToDocx
+      summary: Convert HTML to DOCX
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                html_content:
+                  type: string
+                filename:
+                  type: string
+      responses:
+        '200':
+          description: DOCX file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary 
